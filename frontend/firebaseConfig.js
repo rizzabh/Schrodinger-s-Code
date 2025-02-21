@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getStorage } from "firebase/storage";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDPlmLxeFyGLiQRVOrQxMkdwnyjjn2B9SY",
@@ -24,4 +25,6 @@ if (typeof window !== "undefined") {
     })
     .catch((error) => console.error("Firebase Analytics failed to load", error));
 }const storage = getStorage(app);
-export { storage, analytics };
+const db = getFirestore(app);
+
+export { storage, analytics, db };
