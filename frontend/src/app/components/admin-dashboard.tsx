@@ -31,7 +31,7 @@ export function AdminDashboard({ children }: { children: React.ReactNode }) {
                 <SidebarMenuButton
                   onClick={() => setActiveTab(tab.name)}
                   isActive={activeTab === tab.name}
-                  className="w-full justify-start px-4 py-2 rounded-md transition-colors duration-200"
+                  className={`w-full justify-start px-4 py-2 rounded-md transition-colors ${activeTab == tab.name ? "bg-gray-100 border border-gray-200":""} duration-200`}
                 >
                   <tab.icon className="mr-3 h-5 w-5" />
                   <span>{tab.name}</span>

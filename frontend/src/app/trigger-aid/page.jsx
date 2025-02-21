@@ -5,7 +5,12 @@ import { useState } from "react";
 import "../../../firebaseConfig";
 import { getFirestore, addDoc, collection } from "firebase/firestore";
 import MapComponent from "../components/turf1";
+import MapComponentSubmit from "../components/turf";
 import axios from "axios";
+import { convertSolToInr, convertInrToSol } from "../../../soltoinr";
+import { Toaster, toast } from "sonner";
+import { set } from "lodash";
+
 export default function Page() {
   const {
     register,
@@ -16,23 +21,61 @@ export default function Page() {
   const [geolocation, setGeolocation] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const db = getFirestore();
-
-
+  const [mumbai, setMumbai] = useState(false);
   const onSubmit = async (data) => {
+    setMumbai(true);
+
     if (!geolocation) {
-      alert("Please fetch geolocation");
+      toast.warning("Please fetch geolocation");
       return;
     }
+
     const formData = { ...data, geolocation, imageUrl };
+    const requestedAmount = parseFloat(data.amount);
+
     try {
+      // Always save form data to Firestore
       await addDoc(collection(db, "Trigger"), formData);
-      alert("Form submitted successfully");
+
+      // Check if requested amount is less than 1000 INR
+      if (requestedAmount < 100000) {
+        let solvalue = await convertInrToSol(requestedAmount);
+        console.log(requestedAmount);
+        console.log(solvalue, "solvale");
+        console.log(data.wallet, "ji");
+        console.log(
+          {
+            receiverAddress: `${data.wallet}`,
+            amount: parseFloat(solvalue),
+          },
+          {
+            receiverAddress: "rAhULHBrf2yGuANDuAGLuUTKuLCW17t86T8T6vGcuok",
+            amount: parseFloat(solvalue),
+          }
+        );
+        // Call automation API for small requests
+        const response = await axios.post("/api/automation", {
+          receiverAddress: `${data.wallet}`,
+          amount: parseFloat(solvalue),
+        });
+
+        if (response.status === 200) {
+          toast.success("Small fund request processed automatically!");
+        } else {
+          toast.error("Form submitted but automatic processing failed");
+        }
+      } else {
+        // For larger requests, just submit the form without calling automation
+        toast.warning("Form submitted successfully. Request will be reviewed.");
+      }
+
+      // Reset form state
       reset();
       setGeolocation(null);
       setImageUrl(null);
     } catch (error) {
-      console.error("Error saving document:", error);
-      alert("Error submitting form");
+      console.error("Error processing request:", error);
+      toast.error("Error submitting form");
     }
   };
   const uploadImage = async (event) => {
@@ -42,7 +85,6 @@ export default function Page() {
     formData.append("file", file);
     formData.append("upload_preset", "schrodinger"); // Replace with your Cloudinary upload preset
 
-
     try {
       const response = await axios.post(
         "https://api.cloudinary.com/v1_1/dwl0u1dqd/image/upload", // Replace with your Cloudinary cloud name
@@ -51,7 +93,7 @@ export default function Page() {
       setImageUrl(response.data.secure_url);
     } catch (error) {
       console.error("Error uploading image:", error);
-      alert("Image upload failed");
+      toast.warning("Image upload failed");
     }
   };
 
@@ -64,10 +106,10 @@ export default function Page() {
             longitude: position.coords.longitude,
           });
         },
-        () => alert("Geolocation permission denied!")
+        () => toast.warning("Geolocation permission denied!")
       );
     } else {
-      alert("Geolocation not supported");
+      toast.info("Geolocation not supported");
     }
   };
 
@@ -75,11 +117,11 @@ export default function Page() {
     <div className="flex gap-0 justify-center items-center min-h-screen bg-zinc-900">
       <div className="w-1/3 h-[90vh] rounded-xl border border-zinc-600 shadow-xl m-4 scale-[97%] overflow-hidden  max-md:hidden ">
         {" "}
-        <MapComponent />
+        {mumbai ? <MapComponentSubmit /> : <MapComponent />}
       </div>
       <div className="max-w-3xl w-full p-8 bg-zinc-900/0 text-white rounded-2xl shadow-lg">
         <h2 className="text-5xl max-sm:text-3xl font-semibold text-gray-200 mb-4 relative flex items-center">
-          Fund Request Form 
+          Fund Request Form
           <span className="absolute left-0 w-3 h-3 bg-gray-500 rounded-full animate-ping"></span>
         </h2>
         <p className="text-gray-400 mb-6">
@@ -167,7 +209,7 @@ export default function Page() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300">
-              Wallet Address 
+              Wallet Address
             </label>
             <textarea
               {...register("wallet", { required: "Reason is required" })}
@@ -177,30 +219,37 @@ export default function Page() {
               <p className="text-red-500 text-sm">{errors.reason.message}</p>
             )}
           </div>
-          <input type="file" onChange={uploadImage} className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white" />
-          {imageUrl && <p className="text-green-500 text-sm">Image uploaded successfully</p>}
-          
-          <div className="flex gap-6">
-          <button
-            type="button"
-            onClick={fetchGeolocation}
-            className="w-full bg-gray-700 text-white p-3 rounded-lg hover:bg-gray-600"
-          >
-            Fetch Geolocation
-          </button>
-          {geolocation && (
+          <input
+            type="file"
+            onChange={uploadImage}
+            className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white"
+          />
+          {imageUrl && (
             <p className="text-green-500 text-sm">
-              Location: {geolocation.latitude}, {geolocation.longitude}
+              Image uploaded successfully
             </p>
           )}
-          <button
-            type="submit"
-            className="w-full bg-white text-black font-semibold p-3 rounded-lg hover:bg-gray-600"
-          >
-            Submit
-          </button>
+
+          <div className="flex gap-6">
+            <button
+              type="button"
+              onClick={fetchGeolocation}
+              className="w-full bg-gray-700 text-white p-3 rounded-lg hover:bg-gray-600"
+            >
+              Fetch Geolocation
+            </button>
+            {geolocation && (
+              <p className="text-green-500 text-sm">
+                Location: {geolocation.latitude}, {geolocation.longitude}
+              </p>
+            )}
+            <button
+              type="submit"
+              className="w-full bg-white text-black font-semibold p-3 rounded-lg hover:bg-gray-600"
+            >
+              Submit
+            </button>
           </div>
-         
         </form>
       </div>
     </div>

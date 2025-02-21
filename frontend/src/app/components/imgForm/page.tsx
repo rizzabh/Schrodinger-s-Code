@@ -51,7 +51,7 @@ export default function FundRequestForm() {
 
     for (let i = 0; i < imageFiles.length; i++) {
       const imageFile = imageFiles[i];
-      const storageRef = ref(storage, fundRequests/${imageFile.name});
+      const storageRef = ref(storage, `fundRequests/${imageFile.name}`);
       const uploadTask = uploadBytesResumable(storageRef, imageFile);
 
       await new Promise<void>((resolve, reject) => {
@@ -106,4 +106,8 @@ export default function FundRequestForm() {
       </form>
     </div>
   );
+}
+
+function handleFileInputChange(e: any) {
+  throw new Error("Function not implemented.");
 }
