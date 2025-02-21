@@ -12,7 +12,6 @@ const ProjectCard = ({
     id,
     name,
     description,
-    technologies,
     techNames,
     techLinks,
     github,
@@ -104,23 +103,7 @@ const ProjectCard = ({
                             "mt-4 w-[90%] max-w-[457px] text-[16px] font-semibold text-[#95979D] "
                         }
                     />
-                    <div className="mt-9 mb-9 grid grid-cols-5 gap-5">
-                        {technologies.map((IconComponent, id) => (
-                            <div key={id} className={"relative"}>
-                                <Link
-                                    href={techLinks[id]}
-                                    target="_blank"
-                                    aria-label={`Learn more about ${techNames[id]}`}
-                                    className="w-[20px] text-[20px] md:w-[25px] md:text-[24px] lg:w-[30px] lg:text-[28px]"
-                                    title={techLinks[id]}
-                                    data-blobity-tooltip={techNames[id]}
-                                    data-blobity-magnetic="false"
-                                >
-                                    <IconComponent/>
-                                </Link>
-                            </div>
-                        ))}
-                    </div>
+                    
                 </div>
             </Container>
         </motion.div>
