@@ -1,7 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import WalletContextProvider from "./components/WalletProvider";
-import { WalletIcon } from "lucide-react";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -23,8 +22,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="wallet p-4 bg-zinc-800 border border-zinc-600 cursor-pointer rounded-full w-fit absolute right-0 m-4"><WalletIcon className="text-white"/></div>
-        <WalletContextProvider>{children}</WalletContextProvider>{" "}
+        <WalletContextProvider>
+          
+          {children}
+        </WalletContextProvider>{" "}
       </body>
     </html>
   );

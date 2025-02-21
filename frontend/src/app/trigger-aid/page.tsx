@@ -1,10 +1,12 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../../../firebaseConfig";
 import { getFirestore, addDoc, collection } from "firebase/firestore";
 import MapComponent from "../components/turf1";
+import CircleWallet from "../components/CircleWallet";
+import { usePathname } from "next/navigation";
 
 export default function Page() {
   const {
@@ -37,6 +39,7 @@ export default function Page() {
 
   const fetchGeolocation = () => {
     if (navigator.geolocation) {
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setGeolocation({
@@ -51,8 +54,11 @@ export default function Page() {
     }
   };
 
+
   return (
     <div className="flex gap-0 justify-center items-center min-h-screen bg-zinc-900">
+            <CircleWallet />
+
       <div className="w-1/3 h-[90vh] rounded-xl border border-zinc-600 shadow-xl m-4 scale-[97%] overflow-hidden  max-md:hidden ">
         {" "}
         <MapComponent />
