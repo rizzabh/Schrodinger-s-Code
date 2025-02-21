@@ -22,62 +22,73 @@ export default function Page() {
   const [imageUrl, setImageUrl] = useState(null);
   const db = getFirestore();
   const [mumbai, setMumbai] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const onSubmit = async (data) => {
-    setMumbai(true);
-
-    if (!geolocation) {
-      toast.warning("Please fetch geolocation");
-      return;
-    }
-
-    const formData = { ...data, geolocation, imageUrl };
-    const requestedAmount = parseFloat(data.amount);
-
-    try {
-      // Always save form data to Firestore
-      await addDoc(collection(db, "Trigger"), formData);
-
-      // Check if requested amount is less than 1000 INR
-      if (requestedAmount < 100000) {
-        let solvalue = await convertInrToSol(requestedAmount);
-        console.log(requestedAmount);
-        console.log(solvalue, "solvale");
-        console.log(data.wallet, "ji");
-        console.log(
-          {
-            receiverAddress: `${data.wallet}`,
-            amount: parseFloat(solvalue),
-          },
-          {
-            receiverAddress: "rAhULHBrf2yGuANDuAGLuUTKuLCW17t86T8T6vGcuok",
-            amount: parseFloat(solvalue),
-          }
-        );
-        // Call automation API for small requests
-        const response = await axios.post("/api/automation", {
-          receiverAddress: `${data.wallet}`,
-          amount: parseFloat(solvalue),
-        });
-
-        if (response.status === 200) {
-          toast.success("Small fund request processed automatically!");
-        } else {
-          toast.error("Form submitted but automatic processing failed");
+    setIsSubmitting(true);
+    toast.promise(
+      async () => {
+        if (!geolocation) {
+          throw new Error("Please fetch geolocation");
         }
-      } else {
-        // For larger requests, just submit the form without calling automation
-        toast.warning("Form submitted successfully. Request will be reviewed.");
-      }
 
-      // Reset form state
-      reset();
-      setGeolocation(null);
-      setImageUrl(null);
-    } catch (error) {
-      console.error("Error processing request:", error);
-      toast.error("Error submitting form");
-    }
+        const formData = { ...data, geolocation, imageUrl };
+        const requestedAmount = parseFloat(data.amount);
+
+        try {
+          // Always save form data to Firestore
+          await addDoc(collection(db, "Trigger"), formData);
+
+          // Check if requested amount is less than 1000 INR
+          if (requestedAmount < 100000) {
+            let solvalue = await convertInrToSol(requestedAmount);
+            console.log(requestedAmount);
+            console.log(solvalue, "solvale");
+            console.log(data.wallet, "ji");
+            console.log(
+              {
+                receiverAddress: `${data.wallet}`,
+                amount: parseFloat(solvalue),
+              },
+              {
+                receiverAddress: "rAhULHBrf2yGuANDuAGLuUTKuLCW17t86T8T6vGcuok",
+                amount: parseFloat(solvalue),
+              }
+            );
+            // Call automation API for small requests
+            const response = await axios.post("/api/automation", {
+              receiverAddress: `${data.wallet}`,
+              amount: parseFloat(solvalue),
+            });
+
+            if (response.status === 200) {
+              return "Small fund request processed automatically!";
+            } else {
+              throw new Error("Form submitted but automatic processing failed");
+            }
+          } else {
+            // For larger requests, just submit the form without calling automation
+            return "Form submitted successfully. Request will be reviewed.";
+          }
+        } catch (error) {
+          console.error("Error processing request:", error);
+          throw new Error("Error submitting form");
+        } finally {
+          // Reset form state
+          reset();
+          setGeolocation(null);
+          setImageUrl(null);
+          setIsSubmitting(false);
+        }
+      },
+      {
+        loading: "Please wait till we verify your information",
+        success: (message) => message,
+        error: (error) => error.message
+      }
+    );
   };
+  
   const uploadImage = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -98,6 +109,7 @@ export default function Page() {
   };
 
   const fetchGeolocation = () => {
+    setMumbai(true);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -212,11 +224,11 @@ export default function Page() {
               Wallet Address
             </label>
             <textarea
-              {...register("wallet", { required: "Reason is required" })}
+              {...register("wallet", { required: "Wallet address is required" })}
               className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
             />
-            {errors.reason && (
-              <p className="text-red-500 text-sm">{errors.reason.message}</p>
+            {errors.wallet && (
+              <p className="text-red-500 text-sm">{errors.wallet.message}</p>
             )}
           </div>
           <input
@@ -238,18 +250,25 @@ export default function Page() {
             >
               Fetch Geolocation
             </button>
-            {geolocation && (
-              <p className="text-green-500 text-sm">
-                Location: {geolocation.latitude}, {geolocation.longitude}
-              </p>
-            )}
             <button
               type="submit"
-              className="w-full bg-white text-black font-semibold p-3 rounded-lg hover:bg-gray-600"
+              disabled={!geolocation || isSubmitting}
+              className={`w-full p-3 rounded-lg font-semibold ${
+                !geolocation 
+                  ? "bg-gray-500 text-gray-300 cursor-not-allowed" 
+                  : isSubmitting
+                    ? "bg-gray-400 text-black cursor-not-allowed"
+                    : "bg-white text-black hover:bg-gray-600"
+              }`}
             >
-              Submit
+              {isSubmitting ? "Processing..." : "Submit"}
             </button>
           </div>
+          {geolocation && (
+            <p className="text-green-500 text-sm">
+              Location: {geolocation.latitude}, {geolocation.longitude}
+            </p>
+          )}
         </form>
       </div>
     </div>
