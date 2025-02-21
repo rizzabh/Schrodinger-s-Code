@@ -70,7 +70,7 @@ export default function Home() {
             >
                 <Hero />
                  {/* <About /> */}
-                <Work />
+                {/* <Work /> */}
                {/* <Tools /> */}
                 { /* <Blog /> TODO: Low Priority */ }
                 {/* <Contact /> */}
