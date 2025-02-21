@@ -5,7 +5,7 @@ import { useState } from "react";
 import "../../../firebaseConfig";
 import { getFirestore, addDoc, collection } from "firebase/firestore";
 import MapComponent from "../components/turf1";
-
+import axios from "axios";
 export default function Page() {
   const {
     register,
@@ -16,6 +16,7 @@ export default function Page() {
   const [geolocation, setGeolocation] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const db = getFirestore();
+
 
   const onSubmit = async (data) => {
     if (!geolocation) {
@@ -32,6 +33,25 @@ export default function Page() {
     } catch (error) {
       console.error("Error saving document:", error);
       alert("Error submitting form");
+    }
+  };
+  const uploadImage = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "schrodinger"); // Replace with your Cloudinary upload preset
+
+
+    try {
+      const response = await axios.post(
+        "https://api.cloudinary.com/v1_1/dwl0u1dqd/image/upload", // Replace with your Cloudinary cloud name
+        formData
+      );
+      setImageUrl(response.data.secure_url);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      alert("Image upload failed");
     }
   };
 
@@ -145,6 +165,21 @@ export default function Page() {
               <p className="text-red-500 text-sm">{errors.reason.message}</p>
             )}
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300">
+              Wallet Address 
+            </label>
+            <textarea
+              {...register("wallet", { required: "Reason is required" })}
+              className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+            />
+            {errors.reason && (
+              <p className="text-red-500 text-sm">{errors.reason.message}</p>
+            )}
+          </div>
+          <input type="file" onChange={uploadImage} className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white" />
+          {imageUrl && <p className="text-green-500 text-sm">Image uploaded successfully</p>}
+          
           <div className="flex gap-6">
           <button
             type="button"
