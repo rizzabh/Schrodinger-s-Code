@@ -1,6 +1,6 @@
 "use client";
 
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { WalletMultiButton } from "@tiplink/wallet-adapter-react-ui";
 import React from "react";
 
 const ConnectWallet = () => {
