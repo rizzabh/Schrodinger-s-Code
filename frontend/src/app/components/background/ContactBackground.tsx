@@ -2,7 +2,7 @@ import React from "react";
 
 const ContactBackground: React.FC = () => {
     return (
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 opacity-40">
             <video className="h-full w-full object-cover" autoPlay={true} loop playsInline={true} muted preload="auto">
                 <source src="/contact.webm" type="video/webm" />
             </video>

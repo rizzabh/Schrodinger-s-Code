@@ -69,12 +69,12 @@ export default function Home() {
                 className="flex flex-col items-center justify-center bg-black"
             >
                 <Hero />
-                <About />
+                {/* <About />
                 <Work />
-                <Tools />
+                <Tools /> */}
                 { /* <Blog /> TODO: Low Priority */ }
                 <Contact />
-                <Footer />
+                {/* <Footer /> */}
             </main>
             {/*</ScrollerMotion>*/}
         </>
