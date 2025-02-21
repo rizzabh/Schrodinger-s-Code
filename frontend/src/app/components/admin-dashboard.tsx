@@ -21,7 +21,7 @@ export function AdminDashboard({ children }: { children: React.ReactNode }) {
   const [activeTab, setActiveTab] = useState("Trigger")
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen w-full bg-gray-100">
       <Sidebar className="w-64 bg-white shadow-md">
         <SidebarContent className="p-4">
           <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Admin Dashboard</h1>
