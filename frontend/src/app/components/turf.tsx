@@ -12,6 +12,7 @@ const MapComponent = () => {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
   useEffect(() => {
+    // Get the user's current location
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -20,11 +21,11 @@ const MapComponent = () => {
         },
         (error) => {
           console.error("Error getting location:", error);
-          setUserLocation([72.8777, 19.076]); // Default to Mumbai if denied
+          setUserLocation([72.8777, 19.076]); // Default to Mumbai if permission denied
         }
       );
     } else {
-      console.error("Geolocation is not supported.");
+      console.error("Geolocation is not supported by this browser.");
       setUserLocation([72.8777, 19.076]); // Default to Mumbai
     }
   }, []);
@@ -35,7 +36,7 @@ const MapComponent = () => {
     const mapInstance = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
-      center: [77.209, 28.6139], // Always start from New Delhi
+      center: userLocation,
       zoom: 4,
     });
 
@@ -50,7 +51,7 @@ const MapComponent = () => {
   const animateRoute = (map: mapboxgl.Map, end: [number, number]) => {
     const start: [number, number] = [77.209, 28.6139]; // New Delhi
 
-    // Generate a smooth curve from New Delhi to user's location
+    // Generate a smooth curve with turf.js
     const line = turf.lineString([start, end]);
     const curvedLine = turf.bezierSpline(line);
 
@@ -79,7 +80,7 @@ const MapComponent = () => {
             type: "Feature",
             geometry: {
               type: "Point",
-              coordinates: start, // Start from New Delhi
+              coordinates: start,
             },
             properties: {},
           },
