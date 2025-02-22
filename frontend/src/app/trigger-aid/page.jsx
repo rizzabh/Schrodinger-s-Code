@@ -17,6 +17,7 @@ import {
   DialogDescription,
 } from "@headlessui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { PiCoinVerticalDuotone } from "react-icons/pi";
 
 import { Toaster, toast } from "sonner";
 import { set } from "lodash";
@@ -34,25 +35,7 @@ export default function Page() {
   const db = getFirestore();
   const [mumbai, setMumbai] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  useEffect(() => {
-    // Check if this is the first load
-    const hasLoaded = localStorage.getItem("hasLoadedBefore");
 
-    if (!hasLoaded) {
-      // Set the flag in localStorage
-      localStorage.setItem("hasLoadedBefore", "true");
-      // Reload the page
-      window.location.reload();
-    }
-
-    // Set a timer to remove the flag after 10 seconds
-    const timer = setTimeout(() => {
-      localStorage.removeItem("hasLoadedBefore");
-    }, 10000); // 10 seconds
-
-    // Cleanup the timer if component unmounts
-    return () => clearTimeout(timer);
-  }, []);
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     toast.promise(
@@ -219,168 +202,207 @@ export default function Page() {
       setImage(e.target.files[0]);
     }
   };
+  const [howModal, setHowModal] = useState(false);
+  const handleHowModal = () => {
+    setHowModal(true);
+  };
 
   return (
-    <div className="flex gap-0 justify-center items-center min-h-screen bg-zinc-900">
-      <div className="w-1/3 h-[90vh] rounded-xl border border-zinc-600 shadow-xl m-4 scale-[97%] overflow-hidden  max-md:hidden ">
-        {" "}
-        {mumbai ? <MapComponentSubmit /> : <MapComponent />}
-      </div>
-      <div className="max-w-3xl w-full p-8 bg-zinc-900/0 text-white rounded-2xl shadow-lg">
-        <h2 className="text-5xl max-sm:text-3xl font-semibold text-gray-200 mb-4 relative flex items-center">
-          Fund Request Form
-          <span className="absolute left-0 w-3 h-3 bg-gray-500 rounded-full animate-ping"></span>
-        </h2>
-        <p className="text-gray-400 mb-6">
-          Submit your request and get assistance.
-        </p>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <div className="flex gap-3">
+    <>
+      <header className="bg-zinc-900">
+        <div className="flex items-center h-16 p-4 justify-between gap-2">
+          <div className="flex gap-2">
+            <img src="/logo.svg" width={20} height={20} alt="" />{" "}
+            <p className="text-xl font-medium text-white">GovBlock</p>
+          </div>
+
+          <p
+            title="info"
+            className="cursor-pointer font-normal text-gray-400"
+            onClick={handleHowModal}
+          >
+            How it works?
+          </p>
+        </div>
+      </header>
+      <div className="flex gap-0 justify-center items-center min-h-screen bg-zinc-900">
+        <div className="w-1/3 h-[90vh] rounded-xl border border-zinc-600 shadow-xl m-4 scale-[97%] overflow-hidden  max-md:hidden ">
+          {" "}
+          {mumbai ? <MapComponentSubmit /> : <MapComponent />}
+        </div>
+        <div className="max-w-3xl w-full p-8 bg-zinc-900/0 text-white rounded-2xl shadow-lg">
+          <h2 className="text-5xl max-sm:text-3xl font-semibold text-gray-200 mb-4 relative flex items-center">
+            Fund Request Form
+            <span className="absolute -left-8 w-3 h-3 bg-gray-500 rounded-full animate-ping"></span>
+          </h2>
+          <p className="text-gray-400 mb-6">
+            Submit your request and get assistance.
+          </p>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <div className="flex gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-300">
+                  Organization Name
+                </label>
+                <input
+                  {...register("orgName", {
+                    required: "Organization Name is required",
+                  })}
+                  className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+                />
+                {errors.orgName && (
+                  <p className="text-red-500 text-sm">
+                    {errors.orgName.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300">
+                  Organization Type
+                </label>
+                <select
+                  {...register("orgType", {
+                    required: "Organization Type is required",
+                  })}
+                  className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+                >
+                  <option value="">Select</option>
+                  <option value="NGO">NGO</option>
+                  <option value="Government">Government</option>
+                  <option value="Private">Private</option>
+                </select>
+                {errors.orgType && (
+                  <p className="text-red-500 text-sm">
+                    {errors.orgType.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300">
-                Organization Name
+                Email Address
               </label>
               <input
-                {...register("orgName", {
-                  required: "Organization Name is required",
+                {...register("email", {
+                  required: "Valid email is required",
+                  pattern: {
+                    value: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
+                    message: "Invalid email format",
+                  },
                 })}
                 className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
               />
-              {errors.orgName && (
-                <p className="text-red-500 text-sm">{errors.orgName.message}</p>
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
               )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300">
-                Organization Type
+                Amount Requested (INR)
               </label>
-              <select
-                {...register("orgType", {
-                  required: "Organization Type is required",
-                })}
+              <input
+                type="number"
+                {...register("amount", { required: "Amount is required" })}
                 className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
-              >
-                <option value="">Select</option>
-                <option value="NGO">NGO</option>
-                <option value="Government">Government</option>
-                <option value="Private">Private</option>
-              </select>
-              {errors.orgType && (
-                <p className="text-red-500 text-sm">{errors.orgType.message}</p>
+              />
+              {errors.amount && (
+                <p className="text-red-500 text-sm">{errors.amount.message}</p>
               )}
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Email Address
-            </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Reason for Funds
+              </label>
+              <textarea
+                {...register("reason", { required: "Reason is required" })}
+                className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+              />
+              {errors.reason && (
+                <p className="text-red-500 text-sm">{errors.reason.message}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Wallet Address
+              </label>
+              <textarea
+                {...register("wallet", {
+                  required: "Wallet address is required",
+                })}
+                className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+              />
+              {errors.wallet && (
+                <p className="text-red-500 text-sm">{errors.wallet.message}</p>
+              )}
+            </div>
             <input
-              {...register("email", {
-                required: "Valid email is required",
-                pattern: {
-                  value: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
-                  message: "Invalid email format",
-                },
-              })}
-              className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+              type="file"
+              onChange={uploadImage}
+              className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white"
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm">{errors.email.message}</p>
+            {imageUrl && (
+              <p className="text-green-500 text-sm">
+                Image uploaded successfully
+              </p>
             )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Amount Requested (INR)
-            </label>
-            <input
-              type="number"
-              {...register("amount", { required: "Amount is required" })}
-              className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
-            />
-            {errors.amount && (
-              <p className="text-red-500 text-sm">{errors.amount.message}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Reason for Funds
-            </label>
-            <textarea
-              {...register("reason", { required: "Reason is required" })}
-              className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
-            />
-            {errors.reason && (
-              <p className="text-red-500 text-sm">{errors.reason.message}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Wallet Address
-            </label>
-            <textarea
-              {...register("wallet", {
-                required: "Wallet address is required",
-              })}
-              className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
-            />
-            {errors.wallet && (
-              <p className="text-red-500 text-sm">{errors.wallet.message}</p>
-            )}
-          </div>
-          <input
-            type="file"
-            onChange={uploadImage}
-            className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white"
-          />
-          {imageUrl && (
-            <p className="text-green-500 text-sm">
-              Image uploaded successfully
-            </p>
-          )}
-
-          <div className="flex gap-6">
-            <button
-              type="button"
-              onClick={fetchGeolocation}
-              className="w-full bg-gray-700 text-white p-3 rounded-lg hover:bg-gray-600"
+ <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Kyc Yourself
+              </label>
+              {/* <textarea
+                {...register("reason", { required: "Reason is required" })}
+                className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+              /> */}
+              
+              {errors.reason && (
+                <p className="text-red-500 text-sm">{errors.reason.message}</p>
+              )}
+            </div>
+            <div className="flex gap-6">
+              <button
+                type="button"
+                onClick={fetchGeolocation}
+                className="w-full bg-black/0 text-white p-3 rounded-lg border border-gray-700 hover:bg-gray-600"
+              >
+                Fetch Geolocation
+              </button>
+              <button
+                type="submit"
+                disabled={!geolocation || isSubmitting}
+                className={`w-full p-3 rounded-lg font-semibold ${
+                  !geolocation
+                    ? "bg-gray-100 text-gray-900 cursor-not-allowed"
+                    : isSubmitting
+                    ? "bg-gray-400 text-black cursor-not-allowed"
+                    : "bg-white text-black hover:bg-gray-600"
+                }`}
+              >
+                {isSubmitting ? "Processing..." : "Submit"}
+              </button>
+            </div>
+            <div
+              className="py-2 px-4 text-md cursor-pointer flex font-semibold items-center gap-2 rounded-full bg-gradient-to-b from-white to-zinc-400 text-black w-fit"
+              onClick={() => setIsModalOpen(true)}
             >
-              Fetch Geolocation
-            </button>
-            <button
-              type="submit"
-              disabled={!geolocation || isSubmitting}
-              className={`w-full p-3 rounded-lg font-semibold ${
-                !geolocation
-                  ? "bg-gray-500 text-gray-300 cursor-not-allowed"
-                  : isSubmitting
-                  ? "bg-gray-400 text-black cursor-not-allowed"
-                  : "bg-white text-black hover:bg-gray-600"
-              }`}
-            >
-              {isSubmitting ? "Processing..." : "Submit"}
-            </button>
-          </div>
-          <div
-            className="p-2 border cursor-pointer w-fit"
-            onClick={() => setIsModalOpen(true)}
-          >
-            Fake Submit
-          </div>
-          <ConsentModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onConfirm={handleConfirm}
-          />
-          {geolocation && (
-            <p className="text-green-500 text-sm">
-              Location: {geolocation.latitude}, {geolocation.longitude}
-            </p>
-          )}
-          <div className="text-green-500 text-sm">{signature}</div>
-        </form>
+              <PiCoinVerticalDuotone />
+              Create Token (Optional)
+            </div>
+            <ConsentModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onConfirm={handleConfirm}
+            />
+            {geolocation && (
+              <p className="text-green-500 text-sm">
+                Location: {geolocation.latitude}, {geolocation.longitude}
+              </p>
+            )}
+            <div className="text-green-500 text-sm">{signature}</div>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -404,6 +426,7 @@ const ConsentModal = ({ isOpen, onClose }) => {
     twitter: "",
     telegram: "",
     website: "",
+    image: "",
     amount: 0.01,
     slippage: 10,
     priorityFee: 0.0005,
@@ -438,7 +461,7 @@ const ConsentModal = ({ isOpen, onClose }) => {
           tokenMetadata: {
             name: formState.name,
             symbol: formState.symbol,
-            uri: "abc",
+            uri: formState.image,
           },
           mint: mintKeypair.publicKey.toString(),
           denominatedInSol: "true",
@@ -493,7 +516,7 @@ const ConsentModal = ({ isOpen, onClose }) => {
           <input
             type="text"
             name="name"
-            placeholder="Token Name"
+            placeholder="Token name: Disaster/Event"
             value={formState.name}
             onChange={handleChange}
             className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
@@ -551,6 +574,14 @@ const ConsentModal = ({ isOpen, onClose }) => {
             name="slippage"
             placeholder="Slippage (default: 10)"
             value={formState.slippage}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="text"
+            name="image"
+            placeholder="Image URL (for token)"
+            value={formState.image}
             onChange={handleChange}
             className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
           />

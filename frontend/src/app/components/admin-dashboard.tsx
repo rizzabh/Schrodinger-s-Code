@@ -14,24 +14,23 @@ const tabs = [
   { name: "Trigger", icon: Bolt },
   { name: "Real Time Transaction", icon: BarChart2 },
   { name: "Recent Transaction", icon: ClipboardList },
-  { name: "Registered Users", icon: Users },
 ]
 
 export function AdminDashboard({ children }: { children: React.ReactNode }) {
   const [activeTab, setActiveTab] = useState("Trigger")
 
   return (
-    <div className="flex h-screen w-full bg-gray-100">
-      <Sidebar className="w-64 bg-white shadow-md">
+    <div className="flex h-screen w-full bg-zinc-900">
+      <Sidebar className="w-64 bg-black shadow-md">
         <SidebarContent className="p-4">
-          <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Admin Dashboard</h1>
+          <h1 className="text-2xl font-bold mb-6 text-center text-gray-50">Admin Dashboard</h1>
           <SidebarMenu>
             {tabs.map((tab) => (
               <SidebarMenuItem key={tab.name} className="mb-2">
                 <SidebarMenuButton
                   onClick={() => setActiveTab(tab.name)}
                   isActive={activeTab === tab.name}
-                  className={`w-full justify-start px-4 py-2 rounded-md transition-colors ${activeTab == tab.name ? "bg-gray-100 border border-gray-200":""} duration-200`}
+                  className={`w-full justify-start px-4 py-2 text-white rounded-md transition-colors ${activeTab == tab.name ? "bg-zinc-900 border border-zinc-800":""} duration-200`}
                 >
                   <tab.icon className="mr-3 h-5 w-5" />
                   <span>{tab.name}</span>
@@ -46,7 +45,6 @@ export function AdminDashboard({ children }: { children: React.ReactNode }) {
           {activeTab === "Trigger" && <TriggerTab />}
           {activeTab === "Real Time Transaction" && <RealTimeTransactionTab />}
           {activeTab === "Recent Transaction" && <RecentTransactionTab />}
-          {activeTab === "Registered Users" && <RegisteredUsersTab />}
           {children}
         </div>
       </main>

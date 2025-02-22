@@ -19,7 +19,7 @@ export  function RecentTransactionTab() {
       try {
         // Connect to Solana devnet (or change to mainnet-beta for production)
         const connection = new web3.Connection(
-          "https://devnet.helius-rpc.com/?api-key=1ebc2a4c-a8ae-4dd1-921f-00afdd5853a5",
+          "https://mainnet.helius-rpc.com/?api-key=1ebc2a4c-a8ae-4dd1-921f-00afdd5853a5",
           'confirmed'
         );
 
@@ -289,7 +289,7 @@ export  function RecentTransactionTab() {
                 <TableRow key={transaction.id} className="border-b border-gray-200">
                   <TableCell className="py-3 font-mono text-sm">
                     <a 
-                      href={`https://explorer.solana.com/tx/${transaction.signature}?cluster=devnet`} 
+                      href={`https://explorer.solana.com/tx/${transaction.signature}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline"
