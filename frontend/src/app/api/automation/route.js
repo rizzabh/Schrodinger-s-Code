@@ -114,7 +114,7 @@ export async function POST(request) {
     }
 
     // Connect to Solana with longer timeout
-    const endpoint = "https://devnet.helius-rpc.com/?api-key=a95e3765-35c7-459e-808a-9135a21acdf6";
+    const endpoint = "https://devnet.helius-rpc.com/?api-key=1ebc2a4c-a8ae-4dd1-921f-00afdd5853a5";
     const connection = new Connection(endpoint, {
       commitment: 'confirmed',
       confirmTransactionInitialTimeout: 60000, // 60 seconds

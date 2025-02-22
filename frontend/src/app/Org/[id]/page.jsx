@@ -65,15 +65,15 @@ export default function OrganizationDetails() {
         <div className="mt-6">
           <h3 className="text-2xl font-bold text-white mb-4">Uploaded Images</h3>
           <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
-            {[...Array(4)].map((_, index) => (
-              <div key={index} className="w-full h-96 bg-gray-200 rounded-lg overflow-hidden shadow-md">
+           
+              <div  className="w-full h-72 bg-gray-200 rounded-lg overflow-hidden shadow-md">
                 <img
                   src={request.imageUrl}
                   alt="Uploaded"
                   className="w-full h-full object-cover"
                 />
               </div>
-            ))}
+
           </div>
         </div>
       )}

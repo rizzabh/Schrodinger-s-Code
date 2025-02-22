@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../../../firebaseConfig";
 import { getFirestore, addDoc, collection } from "firebase/firestore";
 import MapComponent from "../components/turf1";
@@ -30,10 +30,29 @@ export default function Page() {
   } = useForm();
   const [geolocation, setGeolocation] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
+  const [signature, setSignature] = useState(null);
   const db = getFirestore();
   const [mumbai, setMumbai] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  useEffect(() => {
+    // Check if this is the first load
+    const hasLoaded = localStorage.getItem("hasLoadedBefore");
 
+    if (!hasLoaded) {
+      // Set the flag in localStorage
+      localStorage.setItem("hasLoadedBefore", "true");
+      // Reload the page
+      window.location.reload();
+    }
+
+    // Set a timer to remove the flag after 10 seconds
+    const timer = setTimeout(() => {
+      localStorage.removeItem("hasLoadedBefore");
+    }, 10000); // 10 seconds
+
+    // Cleanup the timer if component unmounts
+    return () => clearTimeout(timer);
+  }, []);
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     toast.promise(
@@ -42,12 +61,18 @@ export default function Page() {
           throw new Error("Please fetch geolocation");
         }
 
-        const formData = { ...data, geolocation, imageUrl };
+        const formData = {
+          ...data,
+          geolocation,
+          imageUrl,
+          status: "pending",
+          createdAt: new Date(),
+        };
         const requestedAmount = parseFloat(data.amount);
 
         try {
           // Always save form data to Firestore
-          await addDoc(collection(db, "Trigger"), formData);
+          const docRef = await addDoc(collection(db, "Trigger"), formData);
 
           // Check if requested amount is less than 1000 INR
           if (requestedAmount < 100000) {
@@ -69,10 +94,19 @@ export default function Page() {
             const response = await axios.post("/api/automation", {
               receiverAddress: `${data.wallet}`,
               amount: parseFloat(solvalue),
+              requestId: docRef.id, // Pass document ID for reference
             });
 
             if (response.status === 200) {
-              return "Small fund request processed automatically!";
+              setSignature(response.data.signature);
+              await updateDoc(doc(db, "Trigger", docRef.id), {
+                status: "approved",
+                transactionHash:
+                  response.data.signature || response.data.txHash,
+                processedAt: new Date(),
+              });
+
+              return response.data;
             } else {
               throw new Error("Form submitted but automatic processing failed");
             }
@@ -81,6 +115,19 @@ export default function Page() {
             return "Form submitted successfully. Request will be reviewed.";
           }
         } catch (error) {
+          // If we have a document reference, update status to "declined" on error
+          if (error.docRef) {
+            try {
+              await updateDoc(doc(db, "Trigger", error.docRef.id), {
+                status: "declined",
+                errorMessage: error.message,
+                processedAt: new Date(),
+              });
+            } catch (updateError) {
+              console.error("Error updating declined status:", updateError);
+            }
+          }
+
           console.error("Error processing request:", error);
           throw new Error("Error submitting form");
         } finally {
@@ -330,6 +377,7 @@ export default function Page() {
               Location: {geolocation.latitude}, {geolocation.longitude}
             </p>
           )}
+          <div className="text-green-500 text-sm">{signature}</div>
         </form>
       </div>
     </div>

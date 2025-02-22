@@ -36,6 +36,7 @@ export function TriggerTab() {
             <TableHead className="font-semibold text-gray-700">Sr. No</TableHead>
             <TableHead className="font-semibold text-gray-700">Organization Name</TableHead>
             <TableHead className="font-semibold text-gray-700">Amount (INR)</TableHead>
+            <TableHead className="font-semibold text-gray-700">Status </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -47,8 +48,12 @@ export function TriggerTab() {
             >
               <TableCell className="py-3">{index + 1}</TableCell>
               <TableCell className="py-3">{request.orgName || "N/A"}</TableCell>
+            
               <TableCell className="py-3">₹{request.amount?.toLocaleString()}</TableCell>
+              <TableCell className="py-3">₹{request.status}</TableCell>
+
             </TableRow>
+
           ))}
         </TableBody>
       </Table>

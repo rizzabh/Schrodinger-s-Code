@@ -6,7 +6,7 @@ import { Connection, PublicKey, Transaction, SystemProgram } from '@solana/web3.
 import { useState, useEffect } from 'react';
 
 const TREASURY_WALLET = new PublicKey('joon7qDhq3TtrozZnc3TVEoEUmyFGbYtjwzP83UksJv');
-const SOLANA_RPC = 'https://devnet.helius-rpc.com/?api-key=fb5ef076-69e7-4d96-82d8-2237c13aef7a';
+const SOLANA_RPC = 'https://mainnet.helius-rpc.com/?api-key=1ebc2a4c-a8ae-4dd1-921f-00afdd5853a5';
 const connection = new Connection(SOLANA_RPC);
 
 export default function GovernmentDashboard() {
