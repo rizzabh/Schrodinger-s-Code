@@ -3,7 +3,16 @@
 import { useState, useEffect } from "react";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { useRouter } from "next/navigation"; // Use 'next/navigation' in App Router
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/ui/table"
+
 import { db } from "../../../firebaseConfig";
 export function TriggerTab() {
   const [requests, setRequests] = useState([]);
@@ -28,22 +37,22 @@ export function TriggerTab() {
   }, []);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Requests</h2>
+    <div className="bg-black p-6 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-gray-50">Requests</h2>
       <Table>
         <TableHeader>
-          <TableRow className="bg-gray-100">
-            <TableHead className="font-semibold text-gray-700">Sr. No</TableHead>
-            <TableHead className="font-semibold text-gray-700">Organization Name</TableHead>
-            <TableHead className="font-semibold text-gray-700">Amount (INR)</TableHead>
-            <TableHead className="font-semibold text-gray-700">Status </TableHead>
+          <TableRow className="bg-gray-900">
+            <TableHead className="font-semibold text-gray-50">Sr. No</TableHead>
+            <TableHead className="font-semibold text-gray-50">Organization Name</TableHead>
+            <TableHead className="font-semibold text-gray-50">Amount (INR)</TableHead>
+            <TableHead className="font-semibold text-gray-50">Status </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {requests.map((request, index) => (
             <TableRow
               key={request.id}
-              className="border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+              className="border-b border-zinc-950 cursor-pointer hover:bg-gray-900 text-white"
               onClick={() => router.push(`/Org/${request.id}`)} // Navigate to details page
             >
               <TableCell className="py-3">{index + 1}</TableCell>
