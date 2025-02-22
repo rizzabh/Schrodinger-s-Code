@@ -21,7 +21,7 @@ export default function GdeltNewsPage({ city }: GdeltNewsPageProps) {
     if (!city) return;
     setLoading(true);
 
-    const apiUrl = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(city)}&mode=ArtList&maxrecords=40&timespan=2week&format=json`;
+    const apiUrl = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(city)}&mode=ArtList&maxrecords=100&timespan=2week&format=json`;
 
     try {
       const response = await fetch(apiUrl);
