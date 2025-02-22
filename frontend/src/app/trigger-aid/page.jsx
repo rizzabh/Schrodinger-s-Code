@@ -9,6 +9,8 @@ import MapComponentSubmit from "../components/turf";
 import axios from "axios";
 import { convertSolToInr, convertInrToSol } from "../../../soltoinr";
 import { Keypair } from "@solana/web3.js";
+import { PiCoinVerticalDuotone } from "react-icons/pi";
+
 import {
   Dialog,
   DialogPanel,
@@ -362,9 +364,10 @@ export default function Page() {
             </button>
           </div>
           <div
-            className="p-2 border cursor-pointer w-fit"
+            className="py-2 px-4 text-md cursor-pointer flex font-semibold items-center gap-2 rounded-full bg-gradient-to-b from-white to-zinc-400 text-black w-fit"
             onClick={() => setIsModalOpen(true)}
           >
+            <PiCoinVerticalDuotone />
             Create Token (Optional)
           </div>
           <ConsentModal
@@ -404,6 +407,7 @@ const ConsentModal = ({ isOpen, onClose }) => {
     twitter: "",
     telegram: "",
     website: "",
+    image: "",
     amount: 0.01,
     slippage: 10,
     priorityFee: 0.0005,
@@ -438,7 +442,7 @@ const ConsentModal = ({ isOpen, onClose }) => {
           tokenMetadata: {
             name: formState.name,
             symbol: formState.symbol,
-            uri: "abc",
+            uri: formState.image,
           },
           mint: mintKeypair.publicKey.toString(),
           denominatedInSol: "true",
@@ -481,7 +485,7 @@ const ConsentModal = ({ isOpen, onClose }) => {
       onClose={onClose}
       className="fixed inset-0 flex items-center justify-center bg-black/60"
     >
-      <DialogPanel className="bg-[#1E1E1E] p-6 rounded-lg shadow-lg max-w-md border border-gray-700">
+      <DialogPanel className="bg-[#1E1E1E] p-6 rounded-lg shadow-lg max-w-[40rem] border border-gray-700">
         <DialogTitle className="text-lg font-semibold text-white">
           Create a GoFundMe Token?
         </DialogTitle>
@@ -489,95 +493,137 @@ const ConsentModal = ({ isOpen, onClose }) => {
           Enter token details manually:
         </DialogDescription>
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-          <input
-            type="text"
-            name="name"
-            placeholder="Token Name"
-            value={formState.name}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-          />
-          <input
-            type="text"
-            name="symbol"
-            placeholder="Symbol (e.g., ABCD)"
-            value={formState.symbol}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-          />
-          <input
-            type="text"
-            name="description"
-            placeholder="Description"
-            value={formState.description}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-          />
-          <input
-            type="text"
-            name="twitter"
-            placeholder="Twitter (optional)"
-            value={formState.twitter}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-          />
-          <input
-            type="text"
-            name="telegram"
-            placeholder="Telegram (optional)"
-            value={formState.telegram}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-          />
-          <input
-            type="text"
-            name="website"
-            placeholder="Website (optional)"
-            value={formState.website}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-          />
-          <input
-            type="number"
-            name="amount"
-            placeholder="Amount (default: 1)"
-            value={formState.amount}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-          />
-          <input
-            type="number"
-            name="slippage"
-            placeholder="Slippage (default: 10)"
-            value={formState.slippage}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-          />
-          <input
-            type="number"
-            step="0.0001"
-            name="priorityFee"
-            placeholder="Priority Fee (default: 0.0005)"
-            value={formState.priorityFee}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-          />
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3 gap-6 flex">
+          <div>
+            <label className="block text-sm font-medium text-gray-300">
+              Token Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Token name: Disaster/Event"
+              value={formState.name}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+            />
+            <label className="block text-sm font-medium text-gray-300">
+              Symbol
+            </label>
+            <input
+              type="text"
+              name="symbol"
+              placeholder="Symbol (e.g., ABCD)"
+              value={formState.symbol}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+            />
+            <label className="block text-sm font-medium text-gray-300">
+              Description
+            </label>
+            <input
+              type="text"
+              name="description"
+              placeholder="Description"
+              value={formState.description}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+            />
+            <label className="block text-sm font-medium text-gray-300">
+              Twitter (optional)
+            </label>
+            <input
+              type="text"
+              name="twitter"
+              placeholder="Twitter (optional)"
+              value={formState.twitter}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+            />
+            <label className="block text-sm font-medium text-gray-300">
+              Telegram (optional)
+            </label>
+            <input
+              type="text"
+              name="telegram"
+              placeholder="Telegram (optional)"
+              value={formState.telegram}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300">
+              Website (optional)
+            </label>
+            <input
+              type="text"
+              name="website"
+              placeholder="Website (optional)"
+              value={formState.website}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+            />
+            <label className="block text-sm font-medium text-gray-300">
+              Amount (default: 1)
+            </label>
+            <input
+              type="number"
+              name="amount"
+              placeholder="Amount (default: 1)"
+              value={formState.amount}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+            />
+            <label className="block text-sm font-medium text-gray-300">
+              Slippage (default: 10)
+            </label>
+            <input
+              type="number"
+              name="slippage"
+              placeholder="Slippage (default: 10)"
+              value={formState.slippage}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+            />
+            <label className="block text-sm font-medium text-gray-300">
+              Image URL (for token)
+            </label>
+            <input
+              type="text"
+              name="image"
+              placeholder="Image URL (for token)"
+              value={formState.image}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+            />
+            <label className="block text-sm font-medium text-gray-300">
+              Priority Fee (default: 0.0005)
+            </label>
+            <input
+              type="number"
+              step="0.0001"
+              name="priorityFee"
+              placeholder="Priority Fee (default: 0.0005)"
+              value={formState.priorityFee}
+              onChange={handleChange}
+              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+            />
 
-          <div className="mt-4 flex justify-end gap-2">
-            <button
-              type="button"
-              className="px-4 py-2 text-gray-400 border border-gray-600 rounded hover:bg-gray-700/50"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-            >
-              Yes, Create Token
-            </button>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                className="px-4 py-2 text-gray-400 border border-gray-600 rounded hover:bg-gray-700/50"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+              >
+                Yes, Create Token
+              </button>
+            </div>
           </div>
         </form>
       </DialogPanel>
