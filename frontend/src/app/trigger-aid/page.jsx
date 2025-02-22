@@ -8,6 +8,16 @@ import MapComponent from "../components/turf1";
 import MapComponentSubmit from "../components/turf";
 import axios from "axios";
 import { convertSolToInr, convertInrToSol } from "../../../soltoinr";
+import { Keypair } from "@solana/web3.js";
+import {
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  DialogBackdrop,
+  DialogDescription,
+} from "@headlessui/react";
+import { useWallet } from "@solana/wallet-adapter-react";
+
 import { Toaster, toast } from "sonner";
 import { set } from "lodash";
 
@@ -23,7 +33,7 @@ export default function Page() {
   const db = getFirestore();
   const [mumbai, setMumbai] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     toast.promise(
@@ -84,11 +94,11 @@ export default function Page() {
       {
         loading: "Please wait till we verify your information",
         success: (message) => message,
-        error: (error) => error.message
+        error: (error) => error.message,
       }
     );
   };
-  
+
   const uploadImage = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -122,6 +132,44 @@ export default function Page() {
       );
     } else {
       toast.info("Geolocation not supported");
+    }
+  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleConfirm = () => {
+    setIsModalOpen(false);
+    console.log("Creating GoFundMe token...");
+    // Replace this with your actual token creation logic
+  };
+
+  const { publicKey, signTransaction, connected } = useWallet();
+  const [formData, setFormData] = useState({
+    name: "",
+    symbol: "",
+    description: "",
+    twitter: "",
+    telegram: "",
+    website: "",
+    amount: 1,
+    slippage: 10,
+    priorityFee: 0.0005,
+  });
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [txSignature, setTxSignature] = useState("");
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleImageChange = (e) => {
+    if (e.target.files[0]) {
+      setImage(e.target.files[0]);
     }
   };
 
@@ -224,7 +272,9 @@ export default function Page() {
               Wallet Address
             </label>
             <textarea
-              {...register("wallet", { required: "Wallet address is required" })}
+              {...register("wallet", {
+                required: "Wallet address is required",
+              })}
               className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
             />
             {errors.wallet && (
@@ -254,16 +304,27 @@ export default function Page() {
               type="submit"
               disabled={!geolocation || isSubmitting}
               className={`w-full p-3 rounded-lg font-semibold ${
-                !geolocation 
-                  ? "bg-gray-500 text-gray-300 cursor-not-allowed" 
+                !geolocation
+                  ? "bg-gray-500 text-gray-300 cursor-not-allowed"
                   : isSubmitting
-                    ? "bg-gray-400 text-black cursor-not-allowed"
-                    : "bg-white text-black hover:bg-gray-600"
+                  ? "bg-gray-400 text-black cursor-not-allowed"
+                  : "bg-white text-black hover:bg-gray-600"
               }`}
             >
               {isSubmitting ? "Processing..." : "Submit"}
             </button>
           </div>
+          <div
+            className="p-2 border cursor-pointer w-fit"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Fake Submit
+          </div>
+          <ConsentModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onConfirm={handleConfirm}
+          />
           {geolocation && (
             <p className="text-green-500 text-sm">
               Location: {geolocation.latitude}, {geolocation.longitude}
@@ -274,3 +335,204 @@ export default function Page() {
     </div>
   );
 }
+
+// import { useState } from "react";
+// import { useWallet } from "@solana/wallet-adapter-react";
+// import { Keypair } from "@solana/web3.js";
+// import {
+//   Dialog,
+//   DialogPanel,
+//   DialogTitle,
+//   DialogDescription,
+// } from "@headlessui/react";
+
+const ConsentModal = ({ isOpen, onClose }) => {
+  const { publicKey, signTransaction, connected } = useWallet();
+
+  const [formState, setFormState] = useState({
+    name: "",
+    symbol: "",
+    description: "",
+    twitter: "",
+    telegram: "",
+    website: "",
+    amount: 0.01,
+    slippage: 10,
+    priorityFee: 0.0005,
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormState((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!connected || !publicKey) {
+      console.error("Please connect your wallet first");
+      return;
+    }
+
+    try {
+      const mintKeypair = Keypair.generate();
+
+      const response = await fetch("https://pumpportal.fun/api/trade-local", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          publicKey: publicKey.toString(),
+          action: "create",
+          tokenMetadata: {
+            name: formState.name,
+            symbol: formState.symbol,
+            uri: "abc",
+          },
+          mint: mintKeypair.publicKey.toString(),
+          denominatedInSol: "true",
+          amount: formState.amount,
+          slippage: formState.slippage,
+          priorityFee: formState.priorityFee,
+          pool: "pump",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate transaction");
+      }
+      const txData = await response.arrayBuffer();
+      const tx = (
+        await import("@solana/web3.js")
+      ).VersionedTransaction.deserialize(new Uint8Array(txData));
+
+      tx.sign([mintKeypair]);
+      const signedTx = await signTransaction(tx);
+
+      const connection = new (await import("@solana/web3.js")).Connection(
+        "https://mainnet.helius-rpc.com/?api-key=fb5ef076-69e7-4d96-82d8-2237c13aef7a",
+        "confirmed"
+      );
+      const signature = await connection.sendRawTransaction(
+        signedTx.serialize()
+      );
+      //log whole response in console
+      console.log("Transaction response:", response);
+      console.log("Transaction signature:", signature);
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  return (
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      className="fixed inset-0 flex items-center justify-center bg-black/60"
+    >
+      <DialogPanel className="bg-[#1E1E1E] p-6 rounded-lg shadow-lg max-w-md border border-gray-700">
+        <DialogTitle className="text-lg font-semibold text-white">
+          Create a GoFundMe Token?
+        </DialogTitle>
+        <DialogDescription className="mt-2 text-sm text-gray-400">
+          Enter token details manually:
+        </DialogDescription>
+
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+          <input
+            type="text"
+            name="name"
+            placeholder="Token Name"
+            value={formState.name}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="text"
+            name="symbol"
+            placeholder="Symbol (e.g., ABCD)"
+            value={formState.symbol}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="text"
+            name="description"
+            placeholder="Description"
+            value={formState.description}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="text"
+            name="twitter"
+            placeholder="Twitter (optional)"
+            value={formState.twitter}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="text"
+            name="telegram"
+            placeholder="Telegram (optional)"
+            value={formState.telegram}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="text"
+            name="website"
+            placeholder="Website (optional)"
+            value={formState.website}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="number"
+            name="amount"
+            placeholder="Amount (default: 1)"
+            value={formState.amount}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="number"
+            name="slippage"
+            placeholder="Slippage (default: 10)"
+            value={formState.slippage}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="number"
+            step="0.0001"
+            name="priorityFee"
+            placeholder="Priority Fee (default: 0.0005)"
+            value={formState.priorityFee}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              className="px-4 py-2 text-gray-400 border border-gray-600 rounded hover:bg-gray-700/50"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+            >
+              Yes, Create Token
+            </button>
+          </div>
+        </form>
+      </DialogPanel>
+    </Dialog>
+  );
+};
