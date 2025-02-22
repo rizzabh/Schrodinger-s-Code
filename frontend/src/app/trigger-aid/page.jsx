@@ -9,6 +9,8 @@ import MapComponentSubmit from "../components/turf";
 import axios from "axios";
 import { convertSolToInr, convertInrToSol } from "../../../soltoinr";
 import { Keypair } from "@solana/web3.js";
+import { PiCoinVerticalDuotone } from "react-icons/pi";
+
 import {
   Dialog,
   DialogPanel,
@@ -362,9 +364,10 @@ export default function Page() {
             </button>
           </div>
           <div
-            className="p-2 border cursor-pointer w-fit"
+            className="py-2 px-4 text-md cursor-pointer flex font-semibold items-center gap-2 rounded-full bg-gradient-to-b from-white to-zinc-400 text-black w-fit"
             onClick={() => setIsModalOpen(true)}
           >
+            <PiCoinVerticalDuotone />
             Create Token (Optional)
           </div>
           <ConsentModal
