@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
 
-export default function GdeltNewsPage(city) {
+export default function GdeltNewsPage() {
   const [query, setQuery] = useState("");
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -18,7 +20,7 @@ export default function GdeltNewsPage(city) {
     if (!query) return;
     setLoading(true);
     
-    const apiUrl = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(city)}&mode=ArtList&maxrecords=40&timespan=2week&format=json`;
+    const apiUrl = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}&mode=ArtList&maxrecords=40&timespan=2week&format=json`;
 
     try {
       const response = await fetch(apiUrl);
@@ -47,7 +49,18 @@ export default function GdeltNewsPage(city) {
     <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-3xl font-bold text-center mb-6">GDELT News Search</h1>
 
-      
+      <div className="flex gap-2 mb-6">
+        <Input
+          className="text-white"
+          type="text"
+          placeholder="Enter a keyword (e.g., AI, Blockchain)"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <Button onClick={fetchNews} disabled={loading} className="bg-slate-200">
+          {loading ? "Searching..." : "Search"}
+        </Button>
+      </div>
 
       {loading && <p className="text-center">Fetching news...</p>}
 
