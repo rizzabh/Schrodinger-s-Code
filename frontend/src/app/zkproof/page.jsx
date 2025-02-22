@@ -58,7 +58,7 @@ function ReclaimDemo() {
   };
  
   return (
-    <>
+    <div className='h-[900px] bg-white'>
       <button onClick={getVerificationReq}>Get Verification Request</button>
 
       {/* Display QR code when URL is available */}
@@ -75,7 +75,7 @@ function ReclaimDemo() {
           <pre>{JSON.stringify(proofs, null, 2)}</pre>
         </div>
       )}
-    </>
+    </div>
   );
 }
  
