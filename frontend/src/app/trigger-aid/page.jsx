@@ -9,8 +9,6 @@ import MapComponentSubmit from "../components/turf";
 import axios from "axios";
 import { convertSolToInr, convertInrToSol } from "../../../soltoinr";
 import { Keypair } from "@solana/web3.js";
-import { PiCoinVerticalDuotone } from "react-icons/pi";
-
 import {
   Dialog,
   DialogPanel,
@@ -19,6 +17,7 @@ import {
   DialogDescription,
 } from "@headlessui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { PiCoinVerticalDuotone } from "react-icons/pi";
 
 import { Toaster, toast } from "sonner";
 import { set } from "lodash";
@@ -77,7 +76,7 @@ export default function Page() {
           const docRef = await addDoc(collection(db, "Trigger"), formData);
 
           // Check if requested amount is less than 1000 INR
-          if (requestedAmount < 10000) {
+          if (requestedAmount < 100000) {
             let solvalue = await convertInrToSol(requestedAmount);
             console.log(requestedAmount);
             console.log(solvalue, "solvale");
@@ -96,12 +95,12 @@ export default function Page() {
             const response = await axios.post("/api/automation", {
               receiverAddress: `${data.wallet}`,
               amount: parseFloat(solvalue),
-              // requestId: docRef.id, // Pass document ID for reference
+              requestId: docRef.id, // Pass document ID for reference
             });
 
             if (response.status === 200) {
               setSignature(response.data.signature);
-              await updateDoc(collection(db, "Trigger", docRef.id), {
+              await updateDoc(doc(db, "Trigger", docRef.id), {
                 status: "approved",
                 transactionHash:
                   response.data.signature || response.data.txHash,
@@ -110,7 +109,7 @@ export default function Page() {
 
               return response.data;
             } else {
-              // throw new Error("Form submitted but automatic processing failed");
+              throw new Error("Form submitted but automatic processing failed");
             }
           } else {
             // For larger requests, just submit the form without calling automation
@@ -120,7 +119,7 @@ export default function Page() {
           // If we have a document reference, update status to "declined" on error
           if (error.docRef) {
             try {
-              await updateDoc(collection(db, "Trigger", error.docRef.id), {
+              await updateDoc(doc(db, "Trigger", error.docRef.id), {
                 status: "declined",
                 errorMessage: error.message,
                 processedAt: new Date(),
@@ -130,8 +129,8 @@ export default function Page() {
             }
           }
 
-          // console.error("Error processing request:", error);
-          // throw new Error("Error submitting form");
+          console.error("Error processing request:", error);
+          throw new Error("Error submitting form");
         } finally {
           // Reset form state
           reset();
@@ -221,169 +220,195 @@ export default function Page() {
       setImage(e.target.files[0]);
     }
   };
+  const [howModal, setHowModal] = useState(false);
+  const handleHowModal = () => {
+    setHowModal(true);
+  };
 
   return (
-    <div className="flex gap-0 justify-center items-center min-h-screen bg-zinc-900">
-      <div className="w-1/3 h-[90vh] rounded-xl border border-zinc-600 shadow-xl m-4 scale-[97%] overflow-hidden  max-md:hidden ">
-        {" "}
-        {mumbai ? <MapComponentSubmit /> : <MapComponent />}
-      </div>
-      <div className="max-w-3xl w-full p-8 bg-zinc-900/0 text-white rounded-2xl shadow-lg">
-        <h2 className="text-5xl max-sm:text-3xl font-semibold text-gray-200 mb-4 relative flex items-center">
-          Fund Request Form
-          <span className="absolute left-0 w-3 h-3 bg-gray-500 rounded-full animate-ping"></span>
-        </h2>
-        <p className="text-gray-400 mb-6">
-          Submit your request and get assistance.
-        </p>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <div className="flex gap-3">
+    <>
+      <header className="bg-zinc-900">
+        <div className="flex items-center h-16 p-4 justify-between gap-2">
+          <div className="flex gap-2">
+            <img src="/logo.svg" width={20} height={20} alt="" />{" "}
+            <p className="text-xl font-medium text-white">GovBlock</p>
+          </div>
+
+          <p
+            title="info"
+            className="cursor-pointer font-normal text-gray-400"
+            onClick={handleHowModal}
+          >
+            How it works?
+          </p>
+        </div>
+      </header>
+      <div className="flex gap-0 justify-center items-center min-h-screen bg-zinc-900">
+        <div className="w-1/3 h-[90vh] rounded-xl border border-zinc-600 shadow-xl m-4 scale-[97%] overflow-hidden  max-md:hidden ">
+          {" "}
+          {mumbai ? <MapComponentSubmit /> : <MapComponent />}
+        </div>
+        <div className="max-w-3xl w-full p-8 bg-zinc-900/0 text-white rounded-2xl shadow-lg">
+          <h2 className="text-5xl max-sm:text-3xl font-semibold text-gray-200 mb-4 relative flex items-center">
+            Fund Request Form
+            <span className="absolute -left-8 w-3 h-3 bg-gray-500 rounded-full animate-ping"></span>
+          </h2>
+          <p className="text-gray-400 mb-6">
+            Submit your request and get assistance.
+          </p>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <div className="flex gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-300">
+                  Organization Name
+                </label>
+                <input
+                  {...register("orgName", {
+                    required: "Organization Name is required",
+                  })}
+                  className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+                />
+                {errors.orgName && (
+                  <p className="text-red-500 text-sm">
+                    {errors.orgName.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300">
+                  Organization Type
+                </label>
+                <select
+                  {...register("orgType", {
+                    required: "Organization Type is required",
+                  })}
+                  className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+                >
+                  <option value="">Select</option>
+                  <option value="NGO">NGO</option>
+                  <option value="Government">Government</option>
+                  <option value="Private">Private</option>
+                </select>
+                {errors.orgType && (
+                  <p className="text-red-500 text-sm">
+                    {errors.orgType.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300">
-                Organization Name
+                Email Address
               </label>
               <input
-                {...register("orgName", {
-                  required: "Organization Name is required",
+                {...register("email", {
+                  required: "Valid email is required",
+                  pattern: {
+                    value: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
+                    message: "Invalid email format",
+                  },
                 })}
                 className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
               />
-              {errors.orgName && (
-                <p className="text-red-500 text-sm">{errors.orgName.message}</p>
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
               )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300">
-                Organization Type
+                Amount Requested (INR)
               </label>
-              <select
-                {...register("orgType", {
-                  required: "Organization Type is required",
-                })}
+              <input
+                type="number"
+                {...register("amount", { required: "Amount is required" })}
                 className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
-              >
-                <option value="">Select</option>
-                <option value="NGO">NGO</option>
-                <option value="Government">Government</option>
-                <option value="Private">Private</option>
-              </select>
-              {errors.orgType && (
-                <p className="text-red-500 text-sm">{errors.orgType.message}</p>
+              />
+              {errors.amount && (
+                <p className="text-red-500 text-sm">{errors.amount.message}</p>
               )}
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Email Address
-            </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Reason for Funds
+              </label>
+              <textarea
+                {...register("reason", { required: "Reason is required" })}
+                className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+              />
+              {errors.reason && (
+                <p className="text-red-500 text-sm">{errors.reason.message}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Wallet Address
+              </label>
+              <textarea
+                {...register("wallet", {
+                  required: "Wallet address is required",
+                })}
+                className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+              />
+              {errors.wallet && (
+                <p className="text-red-500 text-sm">{errors.wallet.message}</p>
+              )}
+            </div>
             <input
-              {...register("email", {
-                required: "Valid email is required",
-                pattern: {
-                  value: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
-                  message: "Invalid email format",
-                },
-              })}
-              className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+              type="file"
+              onChange={uploadImage}
+              className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white"
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm">{errors.email.message}</p>
+            {imageUrl && (
+              <p className="text-green-500 text-sm">
+                Image uploaded successfully
+              </p>
             )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Amount Requested (INR)
-            </label>
-            <input
-              type="number"
-              {...register("amount", { required: "Amount is required" })}
-              className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
-            />
-            {errors.amount && (
-              <p className="text-red-500 text-sm">{errors.amount.message}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Reason for Funds
-            </label>
-            <textarea
-              {...register("reason", { required: "Reason is required" })}
-              className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
-            />
-            {errors.reason && (
-              <p className="text-red-500 text-sm">{errors.reason.message}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Wallet Address
-            </label>
-            <textarea
-              {...register("wallet", {
-                required: "Wallet address is required",
-              })}
-              className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
-            />
-            {errors.wallet && (
-              <p className="text-red-500 text-sm">{errors.wallet.message}</p>
-            )}
-          </div>
-          <input
-            type="file"
-            onChange={uploadImage}
-            className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white"
-          />
-          {imageUrl && (
-            <p className="text-green-500 text-sm">
-              Image uploaded successfully {imageUrl}
-            </p>
-          )}
 
-          <div className="flex gap-6">
-            <button
-              type="button"
-              onClick={fetchGeolocation}
-              className="w-full bg-gray-700 text-white p-3 rounded-lg hover:bg-gray-600"
+            <div className="flex gap-6">
+              <button
+                type="button"
+                onClick={fetchGeolocation}
+                className="w-full bg-black/0 text-white p-3 rounded-lg border border-gray-700 hover:bg-gray-600"
+              >
+                Fetch Geolocation
+              </button>
+              <button
+                type="submit"
+                disabled={!geolocation || isSubmitting}
+                className={`w-full p-3 rounded-lg font-semibold ${
+                  !geolocation
+                    ? "bg-gray-100 text-gray-900 cursor-not-allowed"
+                    : isSubmitting
+                    ? "bg-gray-400 text-black cursor-not-allowed"
+                    : "bg-white text-black hover:bg-gray-600"
+                }`}
+              >
+                {isSubmitting ? "Processing..." : "Submit"}
+              </button>
+            </div>
+            <div
+              className="py-2 px-4 text-md cursor-pointer flex font-semibold items-center gap-2 rounded-full bg-gradient-to-b from-white to-zinc-400 text-black w-fit"
+              onClick={() => setIsModalOpen(true)}
             >
-              Fetch Geolocation
-            </button>
-            <button
-              type="submit"
-              disabled={!geolocation || isSubmitting}
-              className={`w-full p-3 rounded-lg font-semibold ${
-                !geolocation
-                  ? "bg-gray-500 text-gray-300 cursor-not-allowed"
-                  : isSubmitting
-                  ? "bg-gray-400 text-black cursor-not-allowed"
-                  : "bg-white text-black hover:bg-gray-600"
-              }`}
-            >
-              {isSubmitting ? "Processing..." : "Submit"}
-            </button>
-          </div>
-          <div
-            className="py-2 px-4 text-md cursor-pointer flex font-semibold items-center gap-2 rounded-full bg-gradient-to-b from-white to-zinc-400 text-black w-fit"
-            onClick={() => setIsModalOpen(true)}
-          >
-            <PiCoinVerticalDuotone />
-            Create Token (Optional)
-          </div>
-          <ConsentModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onConfirm={handleConfirm}
-          />
-          {geolocation && (
-            <p className="text-green-500 text-sm">
-              Location: {geolocation.latitude}, {geolocation.longitude}
-            </p>
-          )}
-        <a href={`https://solscan.io/tx/${signature}`}>  <div className="text-green-500 text-sm flex mx-auto">{signature}</div></a>
-        </form>
+              <PiCoinVerticalDuotone />
+              Create Token (Optional)
+            </div>
+            <ConsentModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onConfirm={handleConfirm}
+            />
+            {geolocation && (
+              <p className="text-green-500 text-sm">
+                Location: {geolocation.latitude}, {geolocation.longitude}
+              </p>
+            )}
+            <div className="text-green-500 text-sm">{signature}</div>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -452,13 +477,6 @@ const ConsentModal = ({ isOpen, onClose }) => {
           pool: "pump",
         }),
       });
-      if(response.status === 200){ // successfully generated transaction
-        const data = await response.json();
-        console.log(data , "data")
-        console.log("Transaction: https://solscan.io/tx/" + data.signature);
-    } else {
-        console.log(response.statusText); // log error
-    }
 
       if (!response.ok) {
         throw new Error("Failed to generate transaction");
@@ -492,7 +510,7 @@ const ConsentModal = ({ isOpen, onClose }) => {
       onClose={onClose}
       className="fixed inset-0 flex items-center justify-center bg-black/60"
     >
-      <DialogPanel className="bg-[#1E1E1E] p-6 rounded-lg shadow-lg max-w-[40rem] border border-gray-700">
+      <DialogPanel className="bg-[#1E1E1E] p-6 rounded-lg shadow-lg max-w-md border border-gray-700">
         <DialogTitle className="text-lg font-semibold text-white">
           Create a GoFundMe Token?
         </DialogTitle>
@@ -500,137 +518,103 @@ const ConsentModal = ({ isOpen, onClose }) => {
           Enter token details manually:
         </DialogDescription>
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-3 gap-6 flex">
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Token Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Token name: Disaster/Event"
-              value={formState.name}
-              onChange={handleChange}
-              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-            />
-            <label className="block text-sm font-medium text-gray-300">
-              Symbol
-            </label>
-            <input
-              type="text"
-              name="symbol"
-              placeholder="Symbol (e.g., ABCD)"
-              value={formState.symbol}
-              onChange={handleChange}
-              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-            />
-            <label className="block text-sm font-medium text-gray-300">
-              Description
-            </label>
-            <input
-              type="text"
-              name="description"
-              placeholder="Description"
-              value={formState.description}
-              onChange={handleChange}
-              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-            />
-            <label className="block text-sm font-medium text-gray-300">
-              Twitter (optional)
-            </label>
-            <input
-              type="text"
-              name="twitter"
-              placeholder="Twitter (optional)"
-              value={formState.twitter}
-              onChange={handleChange}
-              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-            />
-            <label className="block text-sm font-medium text-gray-300">
-              Telegram (optional)
-            </label>
-            <input
-              type="text"
-              name="telegram"
-              placeholder="Telegram (optional)"
-              value={formState.telegram}
-              onChange={handleChange}
-              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Website (optional)
-            </label>
-            <input
-              type="text"
-              name="website"
-              placeholder="Website (optional)"
-              value={formState.website}
-              onChange={handleChange}
-              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-            />
-            <label className="block text-sm font-medium text-gray-300">
-              Amount (default: 1)
-            </label>
-            <input
-              type="number"
-              name="amount"
-              placeholder="Amount (default: 1)"
-              value={formState.amount}
-              onChange={handleChange}
-              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-            />
-            <label className="block text-sm font-medium text-gray-300">
-              Slippage (default: 10)
-            </label>
-            <input
-              type="number"
-              name="slippage"
-              placeholder="Slippage (default: 10)"
-              value={formState.slippage}
-              onChange={handleChange}
-              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-            />
-            <label className="block text-sm font-medium text-gray-300">
-              Image URL (for token)
-            </label>
-            <input
-              type="text"
-              name="image"
-              placeholder="Image URL (for token)"
-              value={formState.image}
-              onChange={handleChange}
-              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-            />
-            <label className="block text-sm font-medium text-gray-300">
-              Priority Fee (default: 0.0005)
-            </label>
-            <input
-              type="number"
-              step="0.0001"
-              name="priorityFee"
-              placeholder="Priority Fee (default: 0.0005)"
-              value={formState.priorityFee}
-              onChange={handleChange}
-              className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
-            />
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+          <input
+            type="text"
+            name="name"
+            placeholder="Token name: Disaster/Event"
+            value={formState.name}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="text"
+            name="symbol"
+            placeholder="Symbol (e.g., ABCD)"
+            value={formState.symbol}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="text"
+            name="description"
+            placeholder="Description"
+            value={formState.description}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="text"
+            name="twitter"
+            placeholder="Twitter (optional)"
+            value={formState.twitter}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="text"
+            name="telegram"
+            placeholder="Telegram (optional)"
+            value={formState.telegram}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="text"
+            name="website"
+            placeholder="Website (optional)"
+            value={formState.website}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="number"
+            name="amount"
+            placeholder="Amount (default: 1)"
+            value={formState.amount}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="number"
+            name="slippage"
+            placeholder="Slippage (default: 10)"
+            value={formState.slippage}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="text"
+            name="image"
+            placeholder="Image URL (for token)"
+            value={formState.image}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
+          <input
+            type="number"
+            step="0.0001"
+            name="priorityFee"
+            placeholder="Priority Fee (default: 0.0005)"
+            value={formState.priorityFee}
+            onChange={handleChange}
+            className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white"
+          />
 
-            <div className="mt-4 flex justify-end gap-2">
-              <button
-                type="button"
-                className="px-4 py-2 text-gray-400 border border-gray-600 rounded hover:bg-gray-700/50"
-                onClick={onClose}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-              >
-                Yes, Create Token
-              </button>
-            </div>
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              className="px-4 py-2 text-gray-400 border border-gray-600 rounded hover:bg-gray-700/50"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+            >
+              Yes, Create Token
+            </button>
           </div>
         </form>
       </DialogPanel>
