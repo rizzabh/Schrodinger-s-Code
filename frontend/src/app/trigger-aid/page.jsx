@@ -337,7 +337,7 @@ export default function Page() {
           />
           {imageUrl && (
             <p className="text-green-500 text-sm">
-              Image uploaded successfully
+              Image uploaded successfully {imageUrl}
             </p>
           )}
 
@@ -452,6 +452,13 @@ const ConsentModal = ({ isOpen, onClose }) => {
           pool: "pump",
         }),
       });
+      if(response.status === 200){ // successfully generated transaction
+        const data = await response.json();
+        console.log(data , "data")
+        console.log("Transaction: https://solscan.io/tx/" + data.signature);
+    } else {
+        console.log(response.statusText); // log error
+    }
 
       if (!response.ok) {
         throw new Error("Failed to generate transaction");
