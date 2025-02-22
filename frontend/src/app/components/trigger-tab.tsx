@@ -50,7 +50,7 @@ export function TriggerTab() {
               <TableCell className="py-3">{request.orgName || "N/A"}</TableCell>
             
               <TableCell className="py-3">₹{request.amount?.toLocaleString()}</TableCell>
-              <TableCell className="py-3">₹{request.status}</TableCell>
+                <TableCell className="py-3">{request.amount < 10000 ? "Accepted" : "Pending"}</TableCell>
 
             </TableRow>
 
