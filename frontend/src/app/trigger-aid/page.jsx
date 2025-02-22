@@ -35,25 +35,7 @@ export default function Page() {
   const db = getFirestore();
   const [mumbai, setMumbai] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  useEffect(() => {
-    // Check if this is the first load
-    const hasLoaded = localStorage.getItem("hasLoadedBefore");
 
-    if (!hasLoaded) {
-      // Set the flag in localStorage
-      localStorage.setItem("hasLoadedBefore", "true");
-      // Reload the page
-      window.location.reload();
-    }
-
-    // Set a timer to remove the flag after 10 seconds
-    const timer = setTimeout(() => {
-      localStorage.removeItem("hasLoadedBefore");
-    }, 10000); // 10 seconds
-
-    // Cleanup the timer if component unmounts
-    return () => clearTimeout(timer);
-  }, []);
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     toast.promise(
@@ -364,7 +346,19 @@ export default function Page() {
                 Image uploaded successfully
               </p>
             )}
-
+ <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Kyc Yourself
+              </label>
+              {/* <textarea
+                {...register("reason", { required: "Reason is required" })}
+                className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
+              /> */}
+              
+              {errors.reason && (
+                <p className="text-red-500 text-sm">{errors.reason.message}</p>
+              )}
+            </div>
             <div className="flex gap-6">
               <button
                 type="button"
