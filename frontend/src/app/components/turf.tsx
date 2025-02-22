@@ -3,32 +3,46 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import * as turf from "@turf/turf";
-
+import { db } from "../../../firebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
 mapboxgl.accessToken = "pk.eyJ1IjoicGFuZGV5cmlzaGFiaCIsImEiOiJjbTdlbXN0YXowOWxvMnJzYzdzc2l6NmcyIn0.-yzpc5RJ5xChHtzqXZ_pQQ";
 
 const MapComponent = () => {
+ 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-
-  useEffect(() => {
-    // Get the user's current location
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation([longitude, latitude]);
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          setUserLocation([72.8777, 19.076]); // Default to Mumbai if permission denied
-        }
-      );
-    } else {
-      console.error("Geolocation is not supported by this browser.");
-      setUserLocation([72.8777, 19.076]); // Default to Mumbai
+  const [request, setRequest] = useState<any>([]);
+  const fetchRequest = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Trigger"));
+      console.log(querySnapshot.docs);
+      const requestData = querySnapshot.docs.map((doc) => ({
+        latitude: doc.data().geolocation.latitude.toString(),
+        longitude: doc.data().geolocation.longitude.toString(),
+        ...doc.data(),
+      }));
+      console.log(requestData);
+      await setRequest(requestData);
+      console.log("Request fetched successfully", requestData[0].latitude);
+      console.log(request)
+    } catch (error) {
+      console.error("Error fetching document:", error);
     }
-  }, []);
+  };
+useEffect(() => {
+    fetchRequest();
+  }
+  , []);
+  useEffect(() => {
+    if (request.length > 0 && request[0]?.longitude && request[0]?.latitude) {
+      setUserLocation([
+        parseFloat(request[0].longitude),
+        parseFloat(request[0].latitude),
+      ]);
+    }
+  }, [request]);
+  
 
   useEffect(() => {
     if (!mapContainerRef.current || !userLocation) return;

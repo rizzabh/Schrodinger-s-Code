@@ -38,7 +38,7 @@ function ReclaimDemo() {
 
         console.log('Verification success', proofs);
         setProofs(proofs);
-
+        window.location.href = '/trigger-aid';
         // Add your success logic here, such as:
         // - Updating UI to show verification success
         // - Storing verification status
