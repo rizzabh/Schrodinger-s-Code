@@ -75,7 +75,7 @@ export default function Page() {
           const docRef = await addDoc(collection(db, "Trigger"), formData);
 
           // Check if requested amount is less than 1000 INR
-          if (requestedAmount < 100000) {
+          if (requestedAmount < 10000) {
             let solvalue = await convertInrToSol(requestedAmount);
             console.log(requestedAmount);
             console.log(solvalue, "solvale");
@@ -99,7 +99,7 @@ export default function Page() {
 
             if (response.status === 200) {
               setSignature(response.data.signature);
-              await updateDoc(doc(db, "Trigger", docRef.id), {
+              await updateDoc(collection(db, "Trigger", docRef.id), {
                 status: "approved",
                 transactionHash:
                   response.data.signature || response.data.txHash,
@@ -108,7 +108,7 @@ export default function Page() {
 
               return response.data;
             } else {
-              throw new Error("Form submitted but automatic processing failed");
+              // throw new Error("Form submitted but automatic processing failed");
             }
           } else {
             // For larger requests, just submit the form without calling automation
@@ -118,7 +118,7 @@ export default function Page() {
           // If we have a document reference, update status to "declined" on error
           if (error.docRef) {
             try {
-              await updateDoc(doc(db, "Trigger", error.docRef.id), {
+              await updateDoc(collection(db, "Trigger", error.docRef.id), {
                 status: "declined",
                 errorMessage: error.message,
                 processedAt: new Date(),
@@ -128,8 +128,8 @@ export default function Page() {
             }
           }
 
-          console.error("Error processing request:", error);
-          throw new Error("Error submitting form");
+          // console.error("Error processing request:", error);
+          // throw new Error("Error submitting form");
         } finally {
           // Reset form state
           reset();
@@ -365,7 +365,7 @@ export default function Page() {
             className="p-2 border cursor-pointer w-fit"
             onClick={() => setIsModalOpen(true)}
           >
-            Fake Submit
+            Create Token (Optional)
           </div>
           <ConsentModal
             isOpen={isModalOpen}
@@ -377,7 +377,7 @@ export default function Page() {
               Location: {geolocation.latitude}, {geolocation.longitude}
             </p>
           )}
-          <div className="text-green-500 text-sm">{signature}</div>
+          <div className="text-green-500 text-sm flex mx-auto">{signature}</div>
         </form>
       </div>
     </div>
