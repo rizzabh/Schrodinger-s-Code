@@ -354,6 +354,7 @@ export default function Page() {
                 {...register("reason", { required: "Reason is required" })}
                 className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
               /> */}
+              
               {errors.reason && (
                 <p className="text-red-500 text-sm">{errors.reason.message}</p>
               )}
