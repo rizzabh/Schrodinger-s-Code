@@ -1,5 +1,6 @@
 
 'use client'
+
 import { useState } from 'react';
 import QRCode from 'react-qr-code';
 import { ReclaimProofRequest } from '@reclaimprotocol/js-sdk';
@@ -15,9 +16,9 @@ function ReclaimDemo() {
     // Your credentials from the Reclaim Developer Portal
     // Replace these with your actual credentials
 
-    const APP_ID = '0x5d98315693FA6a9121772ea9Eaf6A5020FdE5791';
-    const APP_SECRET = '0x311dd0b148c9a79e0dc63451b1251911ec9d9b6b87a2327af4b6599b3dc769b8';
-    const PROVIDER_ID = '32d72564-cae8-4d36-af4b-1b5b95d7a116';
+    const APP_ID = '0x98Ae45d53950872727a2131a2338A97DD212E49E';
+    const APP_SECRET = '0x6310195475c2bd93e5f788b42f4f7bbecb9b20e618a6f64ecc649f2a7bc6570c';
+    const PROVIDER_ID = '2b22db5c-78d9-4d82-84f0-a9e0a4ed0470';
  
     // Initialize the Reclaim SDK with your credentials
     const reclaimProofRequest = await ReclaimProofRequest.init(APP_ID, APP_SECRET, PROVIDER_ID);
@@ -57,7 +58,7 @@ function ReclaimDemo() {
   };
  
   return (
-    <div className='h-[900px] bg-white'>
+    <>
       <button onClick={getVerificationReq}>Get Verification Request</button>
 
       {/* Display QR code when URL is available */}
@@ -70,11 +71,11 @@ function ReclaimDemo() {
 
       {proofs && (
         <div>
-          
+          <h2>Verification Successful!</h2>
           <pre>{JSON.stringify(proofs, null, 2)}</pre>
         </div>
       )}
-    </div>
+    </>
   );
 }
  
