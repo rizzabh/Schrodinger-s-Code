@@ -71,7 +71,7 @@ async function sendAndConfirmTransactionWithRetry(connection, transaction, signe
         {
           commitment: 'confirmed',
           maxRetries: 3,
-          skipPreflight: false,
+          skipPreflight: true,
         }
       );
       
@@ -118,7 +118,7 @@ export async function POST(request) {
     const endpoint = "https://mainnet.helius-rpc.com/?api-key=1ebc2a4c-a8ae-4dd1-921f-00afdd5853a5";
     const connection = new Connection(endpoint, {
       commitment: 'confirmed',
-      confirmTransactionInitialTimeout: 60000, // 60 seconds
+      confirmTransactionInitialTimeout: 6000, // 60 seconds
     });
 
     // Initialize sender from secret
@@ -140,8 +140,8 @@ export async function POST(request) {
       );
     }
 
-    // Add buffer for priority fee (0.000005 SOL or 5000 lamports)
-    const priorityFee = 5000;
+    // Add buffer for priority fee (0.00005 SOL or 50000 lamports)
+    const priorityFee = 50000;
     
     if (balance < (lamports + priorityFee)) {
       return NextResponse.json(

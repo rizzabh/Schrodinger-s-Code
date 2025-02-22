@@ -94,7 +94,7 @@ export default function Page() {
             const response = await axios.post("/api/automation", {
               receiverAddress: `${data.wallet}`,
               amount: parseFloat(solvalue),
-              requestId: docRef.id, // Pass document ID for reference
+              // requestId: docRef.id, // Pass document ID for reference
             });
 
             if (response.status === 200) {
@@ -377,7 +377,7 @@ export default function Page() {
               Location: {geolocation.latitude}, {geolocation.longitude}
             </p>
           )}
-          <div className="text-green-500 text-sm flex mx-auto">{signature}</div>
+        <a href={`https://solscan.io/tx/${signature}`}>  <div className="text-green-500 text-sm flex mx-auto">{signature}</div></a>
         </form>
       </div>
     </div>

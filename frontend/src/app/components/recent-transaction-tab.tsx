@@ -289,7 +289,7 @@ export  function RecentTransactionTab() {
                 <TableRow key={transaction.id} className="border-b border-gray-200">
                   <TableCell className="py-3 font-mono text-sm">
                     <a 
-                      href={`https://explorer.solana.com/tx/${transaction.signature}?cluster=devnet`} 
+                      href={`https://explorer.solana.com/tx/${transaction.signature}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline"
