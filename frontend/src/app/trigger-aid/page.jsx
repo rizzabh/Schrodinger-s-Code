@@ -9,6 +9,7 @@ import MapComponentSubmit from "../components/turf";
 import axios from "axios";
 import { convertSolToInr, convertInrToSol } from "../../../soltoinr";
 import { Keypair } from "@solana/web3.js";
+import ReclaimDemo from "../zkproof/page";
 import {
   Dialog,
   DialogPanel,
@@ -216,13 +217,15 @@ export default function Page() {
             <p className="text-xl font-medium text-white">GovBlock</p>
           </div>
 
-          <p
+          <a
+          href="https://buy.onramper.com/?apiKey=pk_prod_41GGD8ENSBSM0EG0N0RKW2Y9ZZ&themeName=dark&containerColor=304256ff&primaryColor=c7f284ff&secondaryColor=2c4256ff&cardColor=19232dff&primaryTextColor=ffffff&secondaryTextColor=ffffff&borderRadius=1&wgBorderRadius=1&partnerContext=Jupiter&successRedirectUrl=https%3A%2F%2Fjup.ag%2Fbridge%2Fonramp&failureRedirectUrl=https%3A%2F%2Fjup.ag%2Fbridge%2Fonramp&mode=buy&defaultCrypto=sol&onlyCryptoNetworks=solana&networkWallets=SOLANA%3ArAhULHBrf2yGuANDuAGLuUTKuLCW17t86T8T6vGcuok&supportOtcTxn=true&excludeFiats=krw/"
             title="info"
+            target="_blank"
             className="cursor-pointer font-normal text-gray-400"
-            onClick={handleHowModal}
+            // onClick={handleHowModal}
           >
-            How it works?
-          </p>
+            Onramp Crypto?
+          </a>
         </div>
       </header>
       <div className="flex gap-0 justify-center items-center min-h-screen bg-zinc-900">
@@ -277,6 +280,8 @@ export default function Page() {
                   </p>
                 )}
               </div>
+            <div className="ml-3 my-8"> <ReclaimDemo /></div> 
+
             </div>
 
             <div>
@@ -346,19 +351,20 @@ export default function Page() {
                 Image uploaded successfully
               </p>
             )}
- <div>
+ {/* <div>
               <label className="block text-sm font-medium text-gray-300">
                 Kyc Yourself
-              </label>
+              </label> */}
               {/* <textarea
                 {...register("reason", { required: "Reason is required" })}
                 className="w-full p-3 bg-zinc-900 border border-zinc-600 rounded-lg text-white focus:ring-2 focus:ring-gray-500"
               /> */}
               
-              {errors.reason && (
+              {/* {errors.reason && (
                 <p className="text-red-500 text-sm">{errors.reason.message}</p>
               )}
-            </div>
+            </div> */}
+            
             <div className="flex gap-6">
               <button
                 type="button"

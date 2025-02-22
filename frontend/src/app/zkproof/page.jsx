@@ -9,7 +9,7 @@ function ReclaimDemo() {
 
   // State to store the verification request URL
   const [requestUrl, setRequestUrl] = useState('');
-  const [proofs, setProofs] = useState([]);
+  const [proofs, setProofs] = useState(null);
  
   const getVerificationReq = async () => {
 
@@ -58,21 +58,28 @@ function ReclaimDemo() {
   };
  
   return (
-    <div className='h-[900px] bg-white'>
-      <button onClick={getVerificationReq}>Get Verification Request</button>
+    <div className='text-white flex gap-5'>
+     {!requestUrl && (
+        // <div className='' style={{ margin: '20px 0' , width:"20px" }}>
+        //   <QRCode value={requestUrl} />
+        // </div>
+        <button onClick={getVerificationReq}>Kyc Yourself</button>
+      )}
+      {/* <button onClick={getVerificationReq}>Kyc Yourself</button> */}
 
       {/* Display QR code when URL is available */}
 
       {requestUrl && (
-        <div style={{ margin: '20px 0' }}>
+        <div className='absolute top-10' style={{ margin: '20px 0' , width:"20px" }}>
           <QRCode value={requestUrl} />
         </div>
       )}
 
       {proofs && (
         <div>
+
           <h2>Verification Successful!</h2>
-          <pre>{JSON.stringify(proofs, null, 2)}</pre>
+          {/* <pre>{JSON.stringify(proofs, null, 2)}</pre> */}
         </div>
       )}
     </div>
